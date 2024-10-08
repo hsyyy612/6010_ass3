@@ -18,7 +18,6 @@ typedef struct Node
 
 typedef struct Graph
 {
-    // fill in
     Node *nodeList;
 } Graph;
 
@@ -26,7 +25,7 @@ typedef struct Graph
 Graph *initializeGraph()
 {
     Graph *newGraph = (Graph *)malloc(sizeof(Graph));
-    newGraph->nodeList = NULL; // No node initially
+    newGraph->nodeList = NULL;
     return newGraph;
 }
 
@@ -45,7 +44,7 @@ void addNode(Graph *myGraph, int myNodeID)
 {
     Node *newNode, *temp;
     newNode = createNode(myNodeID);
-    // newNode->nextNode = myGraph->nodeList;
+
     if (myGraph->nodeList == NULL)
     {
         myGraph->nodeList = newNode;
@@ -128,6 +127,7 @@ void addEdge(Graph *myGraph, int myFromNodeID, int myToNodeID, double myEdgeweig
     }
 }
 
+// Function to print all edges in the graph
 void printEdgeList(Graph *myGraph)
 {
     Node *currentNode = myGraph->nodeList;
@@ -144,6 +144,7 @@ void printEdgeList(Graph *myGraph)
     // printf("\n");
 }
 
+// Function to calculate the number of edges in the graph
 int calcNumEdges(Graph *myGraph)
 {
     int count = 0;
@@ -161,6 +162,7 @@ int calcNumEdges(Graph *myGraph)
     return count;
 }
 
+// Function to delete a single edge
 void deleteEdge(Graph *myGraph, int myFromNodeID, int myToNodeID)
 {
     Node *fromNode = findNode(myGraph, myFromNodeID);
@@ -169,7 +171,9 @@ void deleteEdge(Graph *myGraph, int myFromNodeID, int myToNodeID)
 
     // if fromNode is not in the NodeList
     if (!fromNode)
+    {
         exit(1);
+    }
 
     while (temp != NULL)
     {
@@ -199,7 +203,7 @@ void deleteEdgeList(Edge *curr)
 {
 
     Edge *temp;
-    // Base case: If the list is empty, return
+    // If the list is empty, return
     if (curr == NULL)
     {
         return;
@@ -219,6 +223,7 @@ void deleteNode(Graph *myGraph, int myNodeID)
 {
     Node *currentNode = myGraph->nodeList;
     Node *prevNode = NULL;
+    int nodeDeleted = 0;
 
     while (currentNode != NULL)
     {
@@ -239,9 +244,14 @@ void deleteNode(Graph *myGraph, int myNodeID)
                 prevNode->nextNode = currentNode->nextNode;
             }
             free(currentNode);
+            nodeDeleted = 1;
+            // return;
 
-            return;
-        } 
+            // Don't return here; continue checking the rest of the nodes for edges pointing to this node
+            currentNode = (prevNode == NULL) ? myGraph->nodeList : prevNode->nextNode;
+            continue;
+        }
+
         // Delete edges pointing to the node
         Edge *currentEdge = currentNode->edgeList;
         Edge *prevEdge = NULL;
@@ -251,7 +261,7 @@ void deleteNode(Graph *myGraph, int myNodeID)
             if (currentEdge->toNodeID == myNodeID)
             {
                 // Delete the edge pointing to the node
-                if (prevEdge == NULL)   // If the node is the first node in the node list
+                if (prevEdge == NULL) // If the node is the first node in the node list
                 {
                     currentNode->edgeList = currentEdge->nextEdge;
                 }
@@ -270,10 +280,14 @@ void deleteNode(Graph *myGraph, int myNodeID)
         }
         prevNode = currentNode;
         currentNode = currentNode->nextNode;
-                
     }
 
-    exit(1);
+    // Check if the node was found and deleted, otherwise exit
+
+    if (!nodeDeleted)
+    {
+        exit(1);
+    }
 }
 
 // Function to delete the graph
